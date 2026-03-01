@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Template 1 - GST Invoice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --surface-2: #16161f;
+            --border: rgba(255,255,255,0.07);
+            --border-focus: rgba(201,168,76,0.45);
+            --gold: #c9a84c;
+            --gold-light: #e4c67a;
+            --gold-dim: rgba(201,168,76,0.1);
+            --text: #f0ede8;
+            --text-muted: rgba(240,237,232,0.45);
+            --text-sub: rgba(240,237,232,0.25);
+            --danger: rgba(220,80,80,0.8);
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.88rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 15% 10%, rgba(201,168,76,0.05) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 85% 90%, rgba(100,80,180,0.04) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Top Bar ─── */
+        .topbar {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 60px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeDown 0.5s ease both;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-mark svg { width: 30px; height: 30px; }
+
+        .logo-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .breadcrumb {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+        }
+
+        .breadcrumb a {
+            color: var(--gold);
+            text-decoration: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .breadcrumb a:hover { opacity: 1; }
+
+        /* ─── Page Wrapper ─── */
+        .page {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 52px 40px 80px;
+        }
+
+        /* ─── Page Header ─── */
+        .page-header {
+            margin-bottom: 48px;
+            animation: fadeUp 0.6s 0.1s ease both;
+        }
+
+        .page-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.7rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 14px;
+            opacity: 0.8;
+        }
+
+        .page-eyebrow span {
+            width: 24px;
+            height: 1px;
+            background: var(--gold);
+            opacity: 0.5;
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.6rem;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            line-height: 1.1;
+        }
+
+        .page-title em {
+            font-style: italic;
+            color: var(--gold-light);
+        }
+
+        /* ─── Sections ─── */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        .section:nth-child(2) { animation-delay: 0.15s; }
+        .section:nth-child(3) { animation-delay: 0.22s; }
+        .section:nth-child(4) { animation-delay: 0.29s; }
+        .section:nth-child(5) { animation-delay: 0.36s; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 28px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,0.02);
+        }
+
+        .section-num {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.8rem;
+            color: var(--gold);
+            opacity: 0.6;
+            letter-spacing: 0.1em;
+            min-width: 24px;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.15rem;
+            font-weight: 400;
+            letter-spacing: 0.04em;
+        }
+
+        .section-body {
+            padding: 28px;
+        }
+
+        /* ─── Seller Info Banner ─── */
+        .seller-banner {
+            background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 70%);
+            border: 1px solid rgba(201,168,76,0.2);
+            border-radius: 4px;
+            padding: 20px 24px;
+            margin-bottom: 0;
+        }
+
+        .seller-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gold-light);
+            margin-bottom: 6px;
+            letter-spacing: 0.05em;
+        }
+
+        .seller-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .seller-tags {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .seller-tag {
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            color: var(--gold);
+            border: 1px solid rgba(201,168,76,0.25);
+            padding: 3px 10px;
+            border-radius: 20px;
+            opacity: 0.85;
+        }
+
+        /* ─── Form Grid ─── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .form-grid.three {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.875rem;
+            padding: 10px 14px;
+            outline: none;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--border-focus);
+            background: rgba(201,168,76,0.04);
+        }
+
+        input::placeholder {
+            color: var(--text-sub);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23c9a84c' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a1a24;
+            color: var(--text);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.6) sepia(1) saturate(2) hue-rotate(5deg);
+            cursor: pointer;
+            opacity: 0.6;
+        }
+
+        /* ─── Divider ─── */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0;
+        }
+
+        /* ─── Items Section ─── */
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 1fr 120px 120px auto;
+            gap: 12px;
+            align-items: end;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 16px;
+            transition: border-color 0.2s;
+            animation: fadeUp 0.3s ease both;
+        }
+
+        .item-row:hover {
+            border-color: rgba(201,168,76,0.15);
+        }
+
+        .item-row .form-group label {
+            font-size: 0.65rem;
+        }
+
+        .item-index {
+            position: relative;
+        }
+
+        .item-index::before {
+            content: attr(data-index);
+            position: absolute;
+            top: -28px;
+            left: 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.75rem;
+            color: var(--gold);
+            opacity: 0.4;
+            letter-spacing: 0.1em;
+        }
+
+        .remove-btn {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: 1px solid rgba(220,80,80,0.2);
+            border-radius: 3px;
+            color: rgba(220,80,80,0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .remove-btn:hover {
+            background: rgba(220,80,80,0.1);
+            border-color: rgba(220,80,80,0.5);
+            color: rgba(220,80,80,0.9);
+        }
+
+        .remove-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        /* ─── Action Buttons ─── */
+        .actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            animation: fadeUp 0.6s 0.4s ease both;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: transparent;
+            border: 1px solid rgba(201,168,76,0.3);
+            color: var(--gold);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .btn-add:hover {
+            background: var(--gold-dim);
+            border-color: rgba(201,168,76,0.6);
+        }
+
+        .btn-add svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--gold);
+            fill: none;
+        }
+
+        .btn-submit {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gold);
+            border: none;
+            color: #0a0a0f;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 12px 32px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-submit:hover {
+            background: var(--gold-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+        }
+
+        /* ─── Footer ─── */
+        .footer {
+            position: relative;
+            z-index: 1;
+            padding: 22px 60px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .footer-left {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .footer-dots { display: flex; gap: 6px; }
+        .footer-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
+        .footer-dots span:first-child { background: var(--gold); opacity: 0.5; }
+
+        /* ─── Animations ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 700px) {
+            .topbar { padding: 18px 20px; }
+            .page { padding: 36px 16px 60px; }
+            .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+            .item-row { grid-template-columns: 1fr 1fr; }
+            .item-row .form-group:first-child { grid-column: 1 / -1; }
+            .actions-bar { flex-direction: column; gap: 12px; align-items: stretch; }
+            .btn-submit { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="topbar">
+    <a href="/" class="logo">
+        <div class="logo-mark">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="1" y="1" width="30" height="30" rx="2" stroke="#c9a84c" stroke-width="1"/>
+                <path d="M8 10h16M8 16h10M8 22h12" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="24" cy="22" r="3" fill="#c9a84c" opacity="0.5"/>
+            </svg>
+        </div>
+        <span class="logo-text">Invoicer</span>
+    </a>
+    <div class="topbar-right">
+        <div class="breadcrumb">
+            <a href="/">Home</a> &nbsp;/&nbsp; Template 1
+        </div>
+    </div>
+</header>
+
+<!-- Page -->
+<div class="page">
+
+    <div class="page-header">
+        <div class="page-eyebrow"><span></span> GST Invoice &nbsp;·&nbsp; Template 01 <span></span></div>
+        <h1 class="page-title">Generate <em>GST</em> Invoice</h1>
+    </div>
+
+    <form action="/generate" method="post">
+
+        <!-- Hidden seller fields -->
+        <input type="hidden" name="sellerName" value="ESKAY CHEMICALS & FOODS">
+        <input type="hidden" name="sellerAddress" value="2/209, RKV NAGAR, THEETHIPALAYAM (PO), COIMBATORE - 641 010">
+        <input type="hidden" name="sellerGstin" value="33BJZPS9366N1ZT">
+        <input type="hidden" name="sellerPan" value="BJZPS9366N">
+        <input type="hidden" name="modeOfPayment" value="Credit">
+        <input type="hidden" name="dispatchThrough" value="Direct">
+        <input type="hidden" name="bankDetails" value="South Indian Bank - Theethipalayam">
+        <input type="hidden" name="terms" value="Standard terms apply">
+
+        <!-- Seller Info Banner -->
+        <div class="section" style="animation-delay:0.1s">
+            <div class="section-header">
+                <span class="section-num">—</span>
+                <span class="section-title">Seller</span>
+            </div>
+            <div class="section-body">
+                <div class="seller-banner">
+                    <div class="seller-name">ESKAY CHEMICALS &amp; FOODS</div>
+                    <div class="seller-meta">2/209, RKV Nagar, Theethipalayam (PO), Coimbatore – 641 010</div>
+                    <div class="seller-tags">
+                        <span class="seller-tag">GSTIN: 33BJZPS9366N1ZT</span>
+                        <span class="seller-tag">PAN: BJZPS9366N</span>
+                        <span class="seller-tag">South Indian Bank · Theethipalayam</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invoice Details -->
+        <div class="section" style="animation-delay:0.15s">
+            <div class="section-header">
+                <span class="section-num">01</span>
+                <span class="section-title">Invoice Details</span>
+            </div>
+            <div class="section-body">
+                <div class="form-grid three">
+                    <div class="form-group">
+                        <label>Invoice Number</label>
+                        <input type="text" name="invoiceNumber" placeholder="e.g. INV-2025-001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Invoice Date</label>
+                        <input type="date" name="invoiceDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Buyer Order Date</label>
+                        <input type="date" name="buyerOrderDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Copy Type</label>
+                        <select name="copyType">
+                            <option value="ORIGINAL">ORIGINAL</option>
+                            <option value="DUPLICATE">DUPLICATE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buyer Details -->
+        <div class="section" style="animation-delay:0.22s">
+            <div class="section-header">
+                <span class="section-num">02</span>
+                <span class="section-title">Buyer Details</span>
+            </div>
+            <div class="section-body">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Buyer Name</label>
+                        <input type="text" name="buyerName" placeholder="Company or Individual Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Address Line 1</label>
+                        <input type="text" name="buyerAddressLine1" placeholder="Street / Building" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Address Line 2</label>
+                        <input type="text" name="buyerAddressLine2" placeholder="Area / Locality" required>
+                    </div>
+                    <div class="form-group full">
+                        <label>Address Line 3</label>
+                        <input type="text" name="buyerAddressLine3" placeholder="City, State, PIN" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Buyer GSTIN</label>
+                        <input type="text" name="buyerGstin" placeholder="e.g. 33XXXXX0000X1ZX">
+                    </div>
+                    <div class="form-group">
+                        <label>Buyer PAN</label>
+                        <input type="text" name="buyerPan" placeholder="e.g. XXXXX0000X">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="section" style="animation-delay:0.29s">
+            <div class="section-header">
+                <span class="section-num">03</span>
+                <span class="section-title">Line Items</span>
+            </div>
+            <div class="section-body">
+                <div class="items-container" id="items-container">
+
+                    <div class="item-row">
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" name="description" placeholder="Product / Service name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" step="0.01" name="quantity" placeholder="0.00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Rate (₹)</label>
+                            <input type="number" step="0.01" name="rate" placeholder="0.00" required>
+                        </div>
+                        <div style="display:flex;align-items:flex-end;">
+                            <div style="width:36px;height:36px;"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="actions-bar">
+                    <button type="button" class="btn-add" onclick="addItem()">
+                        <svg viewBox="0 0 24 24" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+                        </svg>
+                        Add Item
+                    </button>
+                    <button type="submit" class="btn-submit">
+                        <svg viewBox="0 0 24 24" stroke-width="1.8" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M14 2v6h6M9 13h6M9 17h4" stroke-linecap="round"/>
+                        </svg>
+                        Generate Invoice
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-left">© 2025 Invoicer &nbsp;·&nbsp; Template 1 – GST Fixed</div>
+    <div class="footer-dots"><span></span><span></span><span></span></div>
+</footer>
+
+<script>
+    function addItem() {
+        const container = document.getElementById("items-container");
+        const div = document.createElement("div");
+        div.className = "item-row";
+        div.innerHTML = `
+            <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="description" placeholder="Product / Service name" required>
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" step="0.01" name="quantity" placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label>Rate (₹)</label>
+                <input type="number" step="0.01" name="rate" placeholder="0.00" required>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+                <button type="button" class="remove-btn" onclick="this.closest('.item-row').remove()">
+                    <svg viewBox="0 0 24 24" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+</script>
+
+</body>
+</html>

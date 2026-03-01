@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Invoice Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0a0a0f;
+            --surface: #111118;
+            --border: rgba(255,255,255,0.07);
+            --gold: #c9a84c;
+            --gold-light: #e4c67a;
+            --gold-dim: rgba(201,168,76,0.15);
+            --text: #f0ede8;
+            --text-muted: rgba(240,237,232,0.45);
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Ambient background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 50% at 20% 20%, rgba(201,168,76,0.06) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 60% at 80% 80%, rgba(100,80,180,0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Grid texture */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Layout ─── */
+        .page {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ─── Top bar ─── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 28px 60px;
+            border-bottom: 1px solid var(--border);
+            animation: fadeDown 0.6s ease both;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            position: relative;
+        }
+
+        .logo-mark svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .logo-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text);
+        }
+
+        .topbar-badge {
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+
+        /* ─── Hero ─── */
+        .hero {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px 60px;
+            text-align: center;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .hero-eyebrow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.72rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 32px;
+            animation: fadeUp 0.7s 0.1s ease both;
+        }
+
+        .hero-eyebrow span {
+            width: 32px;
+            height: 1px;
+            background: var(--gold);
+            opacity: 0.6;
+        }
+
+        .hero-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 6.5rem);
+            font-weight: 300;
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            animation: fadeUp 0.7s 0.2s ease both;
+        }
+
+        .hero-title em {
+            font-style: italic;
+            color: var(--gold-light);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            font-weight: 300;
+            color: var(--text-muted);
+            max-width: 440px;
+            line-height: 1.7;
+            margin-bottom: 72px;
+            animation: fadeUp 0.7s 0.3s ease both;
+        }
+
+        /* ─── Cards ─── */
+        .cards {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            animation: fadeUp 0.7s 0.4s ease both;
+        }
+
+        .card {
+            position: relative;
+            width: 22vw;
+            min-width: 320px;
+            max-width: 420px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 36px 32px;
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-dim) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(201,168,76,0.35);
+            transform: translateY(-4px);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.85rem;
+            color: var(--gold);
+            letter-spacing: 0.2em;
+            margin-bottom: 20px;
+            opacity: 0.7;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-icon svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--gold);
+            fill: none;
+        }
+
+        .card-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 10px;
+            letter-spacing: 0.02em;
+        }
+
+        .card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 32px;
+        }
+
+        .card-arrow {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--gold);
+            transition: gap 0.2s ease;
+        }
+
+        .card:hover .card-arrow {
+            gap: 14px;
+        }
+
+        .card-arrow svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--gold);
+            fill: none;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover .card-arrow svg {
+            transform: translateX(3px);
+        }
+
+        /* Featured card */
+        .card.featured {
+            border-color: rgba(201,168,76,0.25);
+        }
+
+        .card.featured::after {
+            content: 'Popular';
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: var(--gold);
+            color: #0a0a0f;
+            padding: 3px 10px;
+            border-radius: 2px;
+            font-weight: 500;
+        }
+
+        /* ─── Footer ─── */
+        .footer {
+            padding: 28px 60px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeUp 0.6s 0.5s ease both;
+        }
+
+        .footer-left {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .footer-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .footer-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--border);
+        }
+
+        .footer-dots span:first-child {
+            background: var(--gold);
+            opacity: 0.6;
+        }
+
+        /* ─── Animations ─── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Responsive ─── */
+        @media (max-width: 700px) {
+            .topbar, .footer { padding: 22px 24px; }
+            .cards { flex-direction: column; align-items: center; }
+            .card { width: 100%; max-width: 340px; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+        <a href="/" class="logo">
+            <div class="logo-mark">
+                <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="1" y="1" width="30" height="30" rx="2" stroke="#c9a84c" stroke-width="1"/>
+                    <path d="M8 10h16M8 16h10M8 22h12" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round"/>
+                    <circle cx="24" cy="22" r="3" fill="#c9a84c" opacity="0.5"/>
+                </svg>
+            </div>
+            <span class="logo-text">Invoicer</span>
+        </a>
+        <div class="topbar-badge">Professional Suite</div>
+    </header>
+
+    <!-- Hero -->
+    <main class="hero">
+        <div class="hero-eyebrow">
+            <span></span>
+            Invoice Generation Platform
+            <span></span>
+        </div>
+
+        <h1 class="hero-title">
+            Create <em>Elegant</em><br>Invoices Instantly
+        </h1>
+
+        <p class="hero-subtitle">
+            Choose a template crafted for clarity and professionalism.
+            Your billing, refined.
+        </p>
+
+        <!-- Cards -->
+        <div class="cards">
+
+            <a href="/template1" class="card">
+                <div class="card-number">01</div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 12h6M9 16h4M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M14 2v6h6" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="card-title">GST Fixed</div>
+                <div class="card-desc">Pre-configured with GST rates. Ideal for standard Indian business invoicing with automatic tax calculations.</div>
+                <div class="card-arrow">
+                    Open Template
+                    <svg viewBox="0 0 16 16" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </a>
+
+            <a href="/template2" class="card featured">
+                <div class="card-number">02</div>
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="card-title">Fully Editable</div>
+                <div class="card-desc">Complete control over every field — taxes, line items, branding, and terms. Tailored for any business type.</div>
+                <div class="card-arrow">
+                    Open Template
+                    <svg viewBox="0 0 16 16" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-left">© 2025 Invoicer &nbsp;·&nbsp; All rights reserved</div>
+        <div class="footer-dots">
+            <span></span><span></span><span></span>
+        </div>
+    </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Invoice</title>
+    <style>
+        /* ─── Screen ─── */
+        body {
+            font-family: "Times New Roman", serif;
+            background: #f0ede6;
+            margin: 0;
+            padding: 30px 20px 60px;
+        }
+
+        /* ─── Download Button (screen only) ─── */
+        .download-bar {
+            max-width: 210mm;
+            margin: 0 auto 18px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-download {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            background: #1a1a1a;
+            color: #f0ede6;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-download:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .btn-download svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            flex-shrink: 0;
+        }
+
+        /* ─── A4 Paper ─── */
+        .a4 {
+    width: 190mm;   /* Reduced from 210mm */
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 10mm;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+        /* ─── Table ─── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            font-family: "Times New Roman", serif;
+        }
+
+        table, td, th {
+            border: 1px solid #222;
+        }
+
+        td, th {
+            padding: 5px 7px;
+            vertical-align: top;
+        }
+
+        /* ─── Header row ─── */
+        .invoice-title-row td {
+            background: #f0ede6;
+            letter-spacing: 0.18em;
+            font-size: 14px;
+            padding: 9px 7px;
+        }
+
+        /* ─── Seller name ─── */
+        .seller-name {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0.04em;
+        }
+
+        /* ─── Items header ─── */
+        .items-header-row th {
+            background: #f0ede6;
+            font-size: 11.5px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 6px 7px;
+        }
+
+        .items-row td {
+            height: 22px;
+        }
+
+        /* ─── Subtotals ─── */
+        .subtotal-row td {
+            background: #f8f7f4;
+        }
+
+        .grandtotal-row td {
+            background: #f0ede6;
+            font-weight: bold;
+        }
+
+        /* ─── Amount words ─── */
+        .words-label td {
+            background: #f8f7f4;
+            font-size: 11px;
+            color: #555;
+            padding: 4px 7px;
+        }
+
+        .words-value td {
+            font-size: 12.5px;
+            padding: 6px 7px;
+        }
+
+        /* ─── Bank / Terms ─── */
+        .bank-row td,
+        .terms-row td {
+            background: #fafaf8;
+            font-size: 11.5px;
+            line-height: 1.7;
+        }
+
+        .terms-row td {
+            font-size: 11px;
+            line-height: 1.65;
+            color: #333;
+        }
+
+        /* ─── Signature ─── */
+        .signature { height: 80px; }
+
+        .signature-row td {
+            background: #fafaf8;
+        }
+
+        /* ─── Utilities ─── */
+        .center { text-align: center; }
+        .right   { text-align: right; }
+        .bold    { font-weight: bold; }
+
+        /* ─── Print ─── */
+        @media print {
+            body {
+                margin: 0;
+            }
+
+            .download-bar {
+                display: none !important;
+            }
+
+            .a4 {
+                width: 100%;
+                margin: 0;
+                padding: 8mm;
+                box-shadow: none;
+                min-height: unset;
+            }
+
+            @page {
+                size: A4;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Download Button -->
+<div class="download-bar">
+    <button class="btn-download" onclick="window.print()">
+        <svg viewBox="0 0 24 24" stroke-width="2" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="7 10 12 15 17 10" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="15" x2="12" y2="3" stroke-linecap="round"/>
+        </svg>
+        Download PDF
+    </button>
+</div>
+
+<div class="a4">
+    <table>
+
+        <!-- HEADER -->
+        <tr class="invoice-title-row">
+            <td colspan="6" class="center bold">INVOICE</td>
+            <td colspan="2" class="right bold" th:text="${invoice.copyType}"></td>
+        </tr>
+
+        <!-- SELLER + INVOICE BOXES -->
+        <tr>
+            <td colspan="4">
+                <span class="seller-name" th:text="${invoice.sellerName}"></span><br>
+                <span th:text="${invoice.sellerAddress}"></span><br>
+                <b>GSTIN :</b> <span th:text="${invoice.sellerGstin}"></span><br>
+                <b>PAN :</b> <span th:text="${invoice.sellerPan}"></span>
+            </td>
+            <td colspan="2">
+                <b>Invoice No.</b><br>
+                <span th:text="${invoice.invoiceNumber}"></span>
+                <hr>
+                <b>Buyer's Order No.</b><br>
+            </td>
+            <td colspan="2">
+                <b>Dated.</b><br>
+                <span th:text="${invoice.formattedInvoiceDate}"></span>
+                <hr>
+                <b>Dated.</b><br>
+                <span th:text="${invoice.formattedInvoiceDate}"></span>
+            </td>
+        </tr>
+
+        <!-- BUYER -->
+        <tr>
+            <td colspan="4">
+                Buyer<br>
+                <b th:text="${invoice.buyerName}"></b><br>
+                <div>
+                    <span th:text="${invoice.buyerAddressLine1}"></span><br>
+                    <span th:text="${invoice.buyerAddressLine2}"></span><br>
+                    <span th:text="${invoice.buyerAddressLine3}"></span>
+                </div><br>
+                <b>GSTIN :</b> <span th:text="${invoice.buyerGstin}"></span><br>
+                <b>PAN :</b> <span th:text="${invoice.buyerPan}"></span>
+            </td>
+            <td colspan="4"><br>
+                <b>Mode/Terms of Payment:</b> <span th:text="${invoice.modeOfPayment}"></span>
+                <hr><br>
+                <b>Dispatched Through:</b> <span th:text="${invoice.dispatchThrough}"></span>
+            </td>
+        </tr>
+
+        <!-- ITEMS HEADER -->
+        <tr class="items-header-row">
+            <th class="center">SL NO</th>
+            <th>Description of Goods</th>
+            <th class="center">HSN</th>
+            <th class="center">Quantity</th>
+            <th class="center">Rate</th>
+            <th class="center">Per</th>
+            <th class="center" colspan="2">Amount</th>
+        </tr>
+
+        <!-- ITEMS -->
+        <tr th:each="item,iter : ${invoice.items}" class="items-row">
+            <td class="center" th:text="${iter.count}"></td>
+            <td th:text="${item.description}"></td>
+            <td class="center">3215</td>
+            <td class="center" th:text="${item.quantity}"></td>
+            <td class="center" th:text="${item.rate}"></td>
+            <td class="center">Kg</td>
+            <td class="right" colspan="2" th:text="${item.amount}"></td>
+        </tr>
+
+        <!-- TOTAL WEIGHT -->
+        <tr class="subtotal-row">
+            <td colspan="3"></td>
+            <td class="center bold" th:text="${invoice.totalWeight}"></td>
+            <td colspan="2" class="center bold">TOTAL</td>
+            <td class="right bold" colspan="2" th:text="${invoice.totalAmount}"></td>
+        </tr>
+
+        <!-- CGST -->
+        <tr class="subtotal-row">
+            <td colspan="6"><b>CGST @ 9%</b></td>
+            <td class="right" colspan="2" th:text="${invoice.cgst}"></td>
+        </tr>
+
+        <!-- SGST -->
+        <tr class="subtotal-row">
+            <td colspan="6"><b>SGST @ 9%</b></td>
+            <td class="right" colspan="2" th:text="${invoice.sgst}"></td>
+        </tr>
+
+        <!-- GRAND TOTAL -->
+        <tr class="grandtotal-row">
+            <td colspan="6">TOTAL</td>
+            <td class="right" colspan="2" th:text="${invoice.grandTotal}"></td>
+        </tr>
+
+        <!-- AMOUNT WORDS -->
+        <tr class="words-label">
+            <td colspan="8">Amount Chargeable (in words)</td>
+        </tr>
+        <tr class="words-value">
+            <td colspan="8">
+                <b>Rupees:</b> <span th:text="${amountWords}"></span>
+            </td>
+        </tr>
+
+        <!-- BANK -->
+        <tr class="bank-row">
+            <td colspan="8">
+                <b>Company Bank Details</b><br>
+                <span th:text="${invoice.bankDetails}"></span>
+            </td>
+        </tr>
+
+        <!-- TERMS -->
+        <tr class="terms-row">
+            <td colspan="8">
+                <b>Terms and Conditions:</b><br>
+                <span th:text="${invoice.terms}"></span>
+            </td>
+        </tr>
+
+        <!-- SIGNATURE -->
+        <tr class="signature-row">
+            <td colspan="8" class="right signature">
+                <b th:text="${invoice.sellerName}"></b><br><br><br>
+                <b>Authorized Signatory</b>
+            </td>
+        </tr>
+
+    </table>
+</div>
+
+</body>
+</html>

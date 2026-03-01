@@ -1,0 +1,35 @@
+body {
+    font-family: "Times New Roman", serif;
+    margin: 20px;
+}
+
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.main-table, .main-table td, .main-table th {
+    border: 1px solid black;
+}
+
+.main-table td, .main-table th {
+    padding: 6px;
+    vertical-align: top;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.top-align {
+    vertical-align: top;
+}
