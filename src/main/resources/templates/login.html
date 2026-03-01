@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login - GST Template</title>
+    <style>
+        body { font-family: Arial; background:#f4f6f9; }
+        .card {
+            width: 350px;
+            margin: 120px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        input { width:100%; padding:8px; margin:10px 0; }
+        button { width:100%; padding:8px; background:#2563eb; color:white; border:none; }
+        a { font-size: 14px; }
+        .error { color:red; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h3>GST Template Login</h3>
+
+    <form action="/login" method="post">
+        Username:
+        <input type="text" name="username" required>
+
+        Password:
+        <input type="password" name="password" required>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <br>
+    <a href="/forgot-password">Forgot Password?</a>
+
+    <p class="error" th:text="${error}"></p>
+</div>
+
+</body>
+</html>
