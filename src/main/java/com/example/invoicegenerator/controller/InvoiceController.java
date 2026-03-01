@@ -3,11 +3,14 @@ package com.example.invoicegenerator.controller;
 import com.example.invoicegenerator.model.Invoice;
 import com.example.invoicegenerator.model.InvoiceItem;
 import com.example.invoicegenerator.service.NumberToWordsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import jakarta.servlet.http.HttpSession;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,68 +21,80 @@ public class InvoiceController {
     @Autowired
     private NumberToWordsService numberService;
 
-    // TEMPLATE 1 FORM
+    // ================================
+    // LOGIN PAGE
+    // ================================
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
+    // ================================
+    // LOGIN VALIDATION
+    // ================================
+    @PostMapping("/login")
+    public String validateLogin(@RequestParam String username,
+                                @RequestParam String password,
+                                HttpSession session,
+                                Model model) {
+
+        if ("SKBchem".equals(username) && "Skb151275".equals(password)) {
+            session.setAttribute("gstUser", "authenticated");
+            return "redirect:/template1";
+        }
+
+        model.addAttribute("error", "Invalid username or password");
+        return "login";
+    }
+
+    // ================================
+    // PROTECTED GST TEMPLATE
+    // ================================
     @GetMapping("/template1")
-    public String template1Form() {
+    public String template1Form(HttpSession session) {
+
+        if (session.getAttribute("gstUser") == null) {
+            return "redirect:/login";
+        }
+
         return "template1-form";
     }
 
-    // TEMPLATE 2 FORM
+    // ================================
+    // TEMPLATE 2 (NO LOGIN REQUIRED)
+    // ================================
     @GetMapping("/template2")
     public String template2Form() {
         return "template2-form";
     }
 
-    //LOGIN
-    @GetMapping("/login")
-    public String loginPage(){
-        return "login";
-    }
-
-    //LOGIN VALIDATION
-    @PostMapping("/login")
-    public String validateLogin(@RequestParam String username, @RequestParam String password, HttpSession session, Model model){
-        if("SKBchem".equals(username)&&"Skb151275".equals(password))
-        {
-            session.setAttribute("getUser","authenticated");
-            return "redirect:/template1";
-        }
-        model.addAttribute("error","Invalid username or password");
-        return "login";
-    }
-
-    //Protect template1
-    @GetMapping("/template1-form")
-    public String template1Form(HttpSession session)
-    {
-        if(session.getAttribute("gstUser")==null)
-        {
-            return "redirect:/login";
-        }
-        return "template1-form";
-    }
-
-    //Forgot password page
+    // ================================
+    // FORGOT PASSWORD PAGE
+    // ================================
     @GetMapping("/forgot-password")
-    public String forgotPasswordPage()
-    {
+    public String forgotPasswordPage() {
         return "forgot-password";
     }
 
-    //Security question check
+    // ================================
+    // SECURITY QUESTION CHECK
+    // ================================
     @PostMapping("/forgot-password")
-    public String checkSecurityAnswer(@RequestParam String answer, Model model)
-    {
-        if("Maggie".equalsIgnoreCase(answer.trim()))
-        {
-            model.addAttribute("password","Skb151275");
+    public String checkSecurityAnswer(@RequestParam String answer,
+                                      Model model) {
+
+        if ("Maggie".equalsIgnoreCase(answer.trim())) {
+            model.addAttribute("password", "Skb151275");
             return "show-password";
         }
-        model.addAttribute("error","Incorrect answer!");
+
+        model.addAttribute("error", "Incorrect answer!");
         return "forgot-password";
     }
 
-    // GENERATE INVOICE (COMMON FOR BOTH)
+    // ================================
+    // GENERATE INVOICE
+    // ================================
     @PostMapping("/generate")
     public String generateInvoice(
 
@@ -153,7 +168,7 @@ public class InvoiceController {
 
         invoice.setBuyerName(buyerName);
 
-        // Handle Template 2 single address
+        // Template 2 single address support
         if (buyerAddress != null) {
             invoice.setBuyerAddressLine1(buyerAddress);
         } else {
