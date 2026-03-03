@@ -38,7 +38,7 @@ public class InvoiceController {
                                 HttpSession session,
                                 Model model) {
 
-        if ("SKBchem".equals(username) && "Skb151275".equals(password)) {
+        if ("Your_Username".equals(username) && "Your_Password".equals(password)) {
             session.setAttribute("gstUser", "authenticated");
             return "redirect:/template1";
         }
@@ -84,7 +84,7 @@ public class InvoiceController {
                                       Model model) {
 
         if ("Maggie".equalsIgnoreCase(answer.trim())) {
-            model.addAttribute("password", "Skb151275");
+            model.addAttribute("password", "Your_Password");
             return "show-password";
         }
 
@@ -200,3 +200,4 @@ public class InvoiceController {
         return "template1-view";
     }
 }
+
